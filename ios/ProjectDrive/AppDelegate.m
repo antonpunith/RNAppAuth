@@ -9,8 +9,20 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
+#import <AppAuth/AppAuth.h>
+#import "RNAppAuthAuthorizationFlowManager.h"
+
+@interface AppDelegate()<RNAppAuthAuthorizationFlowManager> {
+  id <OIDAuthorizationFlowSession> _currentSession;
+}
+@end
 
 @implementation AppDelegate
+
+-(void)setCurrentAuthorizationFlowSession:(id<OIDAuthorizationFlowSession>)session {
+  // retain session for further use
+  _currentSession = session;
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -30,6 +42,12 @@
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
   return YES;
+}
+
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<NSString *, id> *)options {
+  BOOL shouldOpenUrl = [_currentSession resumeAuthorizationFlowWithURL:url];
+  _currentSession = nil;
+  return shouldOpenUrl;
 }
 
 @end
